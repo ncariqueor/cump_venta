@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
     <head>
-        <title>Meta Cyber Monday</title>
+        <title>Panel de Seguimiento Metas</title>
         <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6-dist/css/bootstrap.css" />
     </head>
 
@@ -99,7 +99,7 @@
         echo "<td><h5 class='text-center'><b>$goal</b></h5></td>";
         echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label''><b>$cump</b></h5></td></tr>";
 
-        $query = "SELECT dm.depto as depto1, d.nomdepto as nomdepto, d.division as division, dm.meta as meta from depto_meta dm, depto d where dm.meta <> 0 and dm.depto = d.depto1 and dm.periodo = $periodo group by division, depto1";
+        $query = "SELECT dm.depto as depto1, d.nomdepto as nomdepto, d.division as division, dm.meta as meta from depto_meta dm, depto d where dm.depto = d.depto1 and dm.periodo = $periodo group by division, depto1";
 
         $res = $ventas->query($query);
 
@@ -121,7 +121,7 @@
                 while ($fila = mysqli_fetch_assoc($result))
                     $meta_div = $fila['meta'];
 
-                $query = "select d.depto1 as depto1 from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.meta <> 0 and dm.periodo = $periodo";
+                $query = "select d.depto1 as depto1 from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.periodo = $periodo";
 
                 $result = $ventas->query($query);
 
@@ -149,7 +149,9 @@
                 while ($fila = mysqli_fetch_assoc($result))
                     $mingresoneto = $fila['mingresoneto'];
 
-                $cump = number_format(round(($mingresoneto / $meta_div) * 100, 1), 1, ',', '.');
+                $cump = 0;
+                if($meta_div != 0)
+                    $cump = number_format(round(($mingresoneto / $meta_div) * 100, 1), 1, ',', '.');
 
                 $mingresoneto = number_format($mingresoneto, 0, ',', '.');
 
@@ -181,7 +183,9 @@
             while($fila = mysqli_fetch_assoc($result))
                 $mingresoneto = $fila['mingresoneto'];
 
-            $cump = round(($mingresoneto / $meta) * 100, 1);
+            $cump = 0;
+            if($meta != 0)
+                $cump = round(($mingresoneto / $meta) * 100, 1);
 
             $mingresoneto = number_format($mingresoneto, 0, ',', '.');
 
