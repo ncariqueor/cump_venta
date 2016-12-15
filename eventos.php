@@ -125,14 +125,17 @@
             $hasta    = $get_aux[2];
             $inicio   = $desde;
             $fin      = $hasta;
-            //echo $periodo . "<br>" . $inicio . "<br>" . $fin . "<br>";
           }
           else{
             $inicio   = $desde_ss;
             $fin      = $hasta_ss;
             $periodo  = $periodo_ss;
-            //echo $periodo . "<br>" . $inicio . "<br>" . $fin . "<br>";
           }
+
+          // variables para el manejo de OTROS
+          $otros  = 0;
+          $deptos = array();
+          $k      = 0;
 
           $query = "select sum(meta) as meta from depto_meta where periodo = '$periodo'";
 
@@ -143,7 +146,6 @@
           while($row = mysqli_fetch_assoc($res))
               $goal = $row['meta'];
 
-          //echo "inicio " . $inicio . " fin " . $fin;
           $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where diaactual between $inicio and $fin";
 
           $res = $ventas->query($query);
@@ -244,10 +246,14 @@
                   if($cump >= 100)
                       $label = "label label-success";
 
-                  echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
-                  echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
-                  echo "<td class='text-center'><h5>$meta_div</h5></td>";
-                  echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                  if($division == 'OTROS'){
+                    $otros = $division."-".$mingresoneto."-".$meta_div."-".$cump;
+                  }else{
+                    echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                    echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
+                    echo "<td class='text-center'><h5>$meta_div</h5></td>";
+                    echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                  }
               }
 
               $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where depto1 = $depto and diaactual between $inicio and $fin";
@@ -280,16 +286,45 @@
               if($cump >= 100)
                   $label = "label label-success";
 
+              if($depto == 706 || $depto == 732){
+                $deptos[$k] = $depto."-".$nomdepto."-".$mingresoneto."-".$meta."-".$cump;
+                $k++;
+              }
+              else{
+                echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
+                echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
+                echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
+                echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+              }
+              $div_temp = $division;
+            }
+// cambio de OTROS para el final de la lista
+            $otros_aux      = explode("-", $otros);
+            $division       = $otros_aux[0];
+            $mingresoneto   = $otros_aux[1];
+            $meta_div       = $otros_aux[2];
+            $cump           = $otros_aux[3];
+            echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+            echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
+            echo "<td class='text-center'><h5>$meta_div</h5></td>";
+            echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+
+            for($i = 0; $i < count($deptos); $i++){
+              $deptos_aux   = $deptos[$i];
+              $deptos_aux   = explode("-", $deptos_aux);
+              $depto        = $deptos_aux[0];
+              $nom_depto    = $deptos_aux[1];
+              $mingresoneto = $deptos_aux[2];
+              $meta         = $deptos_aux[3];
+              $cump         = $deptos_aux[4];
               echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
               echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
               echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
               echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
-
-              $div_temp = $division;
-                }
-                ?>
-                </table>
-                </div>
+            }
+          ?>
+        </table>
+      </div>
 
 
 <!-- INICIO FOOTER -->
