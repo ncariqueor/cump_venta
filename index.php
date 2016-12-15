@@ -2,57 +2,205 @@
 <html lang="es">
     <head>
         <title>Panel de Seguimiento Metas</title>
-        <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6-dist/css/bootstrap.css" />
         <script>
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-            ga('create', 'UA-88784345-1', 'auto');
-            ga('send', 'pageview');
-
+        function showUser(str) {
+            if (str == "") {
+                document.getElementById("periodo").innerHTML = "";
+                return;
+            } else {
+                if (window.XMLHttpRequest) {
+                    // code for IE7+, Firefox, Chrome, Opera, Safari
+                    xmlhttp = new XMLHttpRequest();
+                } else {
+                    // code for IE6, IE5
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                xmlhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById("periodo").innerHTML = this.responseText;
+                    }
+                };
+                xmlhttp.open("GET","ajax.php?periodo="+str,true);
+                xmlhttp.send();
+            }
+        }
         </script>
+        <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6-dist/css/bootstrap.css" />
     </head>
 
     <body>
+
+<!-- INICIO CONTAINER -->
         <div class="container">
             <h1 class="text-center"><a href="http://10.95.17.114/paneles"><img src="paris.png" width="140" height="100"></a>Panel de Seguimiento Metas</h1><br>
 
             <div class="row">
-                <div class="col-lg-11 col-sm-11"><h5 class="text-center text-success" style="margin-left: 200px;"><?php
-                        date_default_timezone_set("America/Santiago");
-                        $ventas = new mysqli('localhost', 'root', '', 'ventas');
-                        $query = "select hora from actualizar";
-
-
-                        ?></h5>
-                </div>
-
-                <div class="col-lg-5 col-sm-5" style="margin-left: 30%;">
-                    <select class="form-control">
+                <div class="col-lg-11 col-sm-11">
+                    <h5 class="text-center text-success" style="margin-left: 200px;">
                         <?php
-                        $query = "select periodo, desde, hasta from depto_meta where periodo = 201610 limit 1";
-                        $res = $ventas->query($query);
-
-                        $periodo = 0;
-                        $desde = 0;
-                        $hasta = 0;
-
-                        while($row = mysqli_fetch_assoc($res)){
-                            $periodo = $row['periodo'];
-                            $desde = $row['desde'];
-                            $hasta = $row['hasta'];
-                        }
-
-                        echo "<option value='#'>Período $periodo - desde el " . date("d/m/Y", strtotime("{$desde}")) . " hasta el " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
-
+                            date_default_timezone_set("America/Santiago");
+                            $ventas = new mysqli('localhost', 'root', '', 'ventas');
+                            $query = "select hora from actualizar";
+                            $fecha = date("Ym", strtotime(" -2 months"));
                         ?>
-                    </select>
+                    </h5>
                 </div>
             </div>
-        </div><br>
 
+
+            <div class="row">
+              <!-- Combo-box periodo -->
+              <div class="col-sm-2 col-sm-offset-1">
+                  <form>
+                    <div class="text-center"><span class="label label-primary" style="font-size: 13px;">Año Comercial</span></div>
+                        <select class="form-control" name="años" onchange="showUser(this.value)">
+                        <?php
+                          $ventas   = new mysqli('localhost', 'root', '', 'ventas');
+                          $query    = "select distinct periodo, desde, hasta from depto_meta where periodo >= 201610";
+                          $res      = $ventas->query($query);
+                          $fecha    = date("Ymd");
+
+                          $periodo_temp = 0;
+
+                          if(isset($_GET['periodo'])){
+                            $get          = $_GET['periodo'];
+                            $get_aux      = explode("&", $get);
+                            $periodo_get  = $get_aux[0];
+                            $periodo_get  = substr($periodo_get, 0, -2);
+
+                            while($row = mysqli_fetch_assoc($res)){
+
+                              $periodo      = $row['periodo'];
+                              $periodo_aux  = substr($periodo, 0, -2);
+                              $desde        = $row['desde'];
+                              $hasta        = $row['hasta'];
+                              if($periodo_aux != $periodo_temp){
+                                if($periodo_aux == $periodo_get){
+                                  echo "<option value='$periodo' selected='selected'>$periodo_aux" . "</option>";
+                                }
+                                else{
+                                  echo "<option value='$periodo'>$periodo_aux" . "</option>";
+                                }
+                              }
+                              $periodo_temp = $periodo;
+                              $periodo_temp = substr($periodo_temp, 0, -2);
+                            }
+                          }
+                          else{
+                            $res = $ventas->query($query);
+
+                            while($row = mysqli_fetch_assoc($res)){
+                              $periodo = $row['periodo'];
+                              $periodo_aux = substr($periodo, 0, -2);
+                              $desde = $row['desde'];
+                              $hasta = $row['hasta'];
+                              if($periodo_aux != $periodo_temp){
+                                if($fecha >= $desde && $fecha <= $hasta){
+                                  echo "<option value='$periodo' selected='selected'>$periodo_aux" . "</option>";
+                                }
+                                else{
+                                  echo "<option value='$periodo'>$periodo_aux" . "</option>";
+                                }
+                              }
+                              $periodo_temp = $periodo;
+                              $periodo_temp = substr($periodo_temp, 0, -2);
+                            }
+                          }
+                        ?>
+                      </select>
+                    </form>
+                  </div>
+
+            <!-- Combo-box periodo comercial -->
+            <div class="col-sm-6">
+              <div class="row">
+              <form>
+
+              <div class="col-sm-8">
+                  <div class="text-center"><span class="label label-primary" style="font-size: 13px;">Periodo Comercial</span></div>
+                <div class="row" method="get" action="index.php">
+                  <select name="periodo" id="periodo" class="form-control">
+                    <?php
+                      $query  = "select distinct periodo, desde, hasta from depto_meta where periodo >= 201610";
+                      $res    = $ventas->query($query);
+                      $fecha  = date("Ymd");
+                      $año    = date("Y");
+
+
+                      if(isset($_GET['periodo'])){
+                        $get           = $_GET['periodo'];
+                        $get_aux       = explode("&", $get);
+                        $periodo_temp  = $get_aux[0];
+                        $periodo_get_año  = substr($periodo_temp, 0, -2);
+
+                        while($row = mysqli_fetch_assoc($res)){
+                          $periodo      = $row['periodo'];
+                          $periodo_aux  = substr($periodo, -2);
+                          $periodo_año  = substr($periodo, 0, -2);
+                          $desde        = $row['desde'];
+                          $hasta        = $row['hasta'];
+                          if($periodo_temp == $periodo){
+                            echo "<option value='$periodo&$desde&$hasta' selected='selected'>Periodo comercial $periodo_aux:  " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                          }
+                          elseif($periodo_get_año == $periodo_año && $periodo > ($periodo_año-1)."12"){
+                            echo "<option value='$periodo&$desde&$hasta'>Periodo comercial $periodo_aux:  " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                          }
+                        }
+                      }
+                      else{
+                        $res = $ventas->query($query);
+
+                        while($row = mysqli_fetch_assoc($res)){
+                          $periodo      = $row['periodo'];
+                          $periodo_aux  = substr($periodo, -2);
+                          $desde        = $row['desde'];
+                          $hasta        = $row['hasta'];
+
+                          if($fecha >= $desde && $fecha <= $hasta){
+                            echo "<option value='$periodo&$desde&$hasta' selected='selected'>Periodo comercial $periodo_aux:  " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                            $desde_ss     = $desde;
+                            $hasta_ss     = $hasta;
+                            $periodo_ss   = $periodo;
+                            $periodo_año  = substr($periodo,0 , -2);
+                          }
+                          elseif($periodo <= $periodo_año."12" && $periodo > ($periodo_año-1)."12"){
+                            echo "<option value='$periodo&$desde&$hasta'>Periodo comercial $periodo_aux:  " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                          }
+                          $año = substr($periodo, 0, -2);
+                      }
+                    }
+                    ?>
+                  </select>
+                </div>
+              </div><br>
+
+<!-- Boton seleccionar periodo -->
+              <div class="col-sm-4">
+                <button class="btn btn-primary">Seleccionar periodo</button>
+              </div>
+            </form>
+          </div>
+          </div>
+
+<!-- Combo-box evento comercial -->
+          <div class="col-sm-2"><br>
+            <div class="dropdown">
+              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                Seleccione Tipo de Panel
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a href="indexCopia.php">Año comercial</a></li>
+                <li><a href="eventos.php">Evento comercial</a></li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+      </div><br>
+
+<!-- Fila principal -->
         <div class="container">
         <table class="table table-condensed">
             <thead>
@@ -63,21 +211,33 @@
                     <th style="color: white; background-color: #00ABFF;"><h5><b>% Cumplimiento</b></h5></th>
                 </tr>
             </thead>
+
+<!-- COMIENZO LLENADO DE TABLA -->
         <?php
+        if(isset($_GET['periodo'])){
+            $get      = $_GET['periodo'];
+            $get_aux  = explode("&", $get);
+            $periodo  = $get_aux[0];
+            $desde    = $get_aux[1];
+            $hasta    = $get_aux[2];
+            $inicio   = $desde;
+            $fin      = $hasta;
 
-        $inicio = $desde;
-
-        $fin = $hasta;
+        }
+        else{
+          $inicio = $desde_ss;
+          $fin = $hasta_ss;
+          $periodo = $periodo_ss;
+        }
 
         $query = "select sum(meta) as meta from depto_meta where periodo = $periodo";
-
         $res = $ventas->query($query);
-
         $goal = 0;
 
         while($row = mysqli_fetch_assoc($res))
             $goal = $row['meta'];
 
+        //echo "inicio " . $inicio . " fin " . $fin;
         $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where diaactual between $inicio and $fin";
 
         $res = $ventas->query($query);
@@ -116,10 +276,10 @@
         $div_temp = "";
 
         while($row = mysqli_fetch_assoc($res)){
-            $division = $row['division'];
-            $depto = $row['depto1'];
-            $nomdepto = $row['nomdepto'];
-            $meta = $row['meta'];
+            $division   = $row['division'];
+            $depto      = $row['depto1'];
+            $nomdepto   = $row['nomdepto'];
+            $meta       = $row['meta'];
 
             if($div_temp != $division) {
                 $query = "select sum(dm.meta) as meta from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.periodo = $periodo";
@@ -178,10 +338,34 @@
                 if($cump >= 100)
                     $label = "label label-success";
 
-                echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
-                echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
-                echo "<td class='text-center'><h5>$meta_div</h5></td>";
-                echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                $array = array();
+                $i = 0;
+                if($division != 'OTROS'){
+                  echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                  echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
+                  echo "<td class='text-center'><h5>$meta_div</h5></td>";
+                  echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                }else{
+                  //division = 'Z';
+                  //echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                  echo "<td class='text-center'><h5></h5></td>";
+                  echo "<td class='text-center'><h5></h5></td>";
+                  echo "<td class='text-center'><h5></h5></td>";
+                  echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'></h5></td></tr>";
+                  //echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                  //$array[$i] = $division."-".$mingresoneto."-".$meta_div."-".$cump;
+                  //$porciones = explode("-", $array[$i]);
+                  //echo "division ".$porciones[0] ."<br>"; // porción1
+                  //echo "mingresoneto ".$porciones[1] ."<br>"; // porción2
+                  //echo "meta_div ".$porciones[2] ."<br>"; // porción1
+                  //echo "cump ".$porciones[3] ."<br>"; // porción2
+                  //echo $array[$i]."<td>";
+
+                  //echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                  //echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
+                  //echo "<td class='text-center'><h5>$meta_div</h5></td>";
+                  //echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                }
             }
 
             $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where depto1 = $depto and diaactual between $inicio and $fin";
