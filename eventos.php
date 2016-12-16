@@ -3,13 +3,13 @@
     <head>
         <title>Panel de Seguimiento Metas</title>
         <link rel="stylesheet" type="text/css" href="bootstrap-3.3.6-dist/css/bootstrap.css" />
+        <style>
+          h3 {
+              text-align: center;
+          }
+        </style>
     </head>
-    <style>
-      select {
-       ...
-       padding: 0 0 0 20px;
-      }
-    </style>
+
 
     <body>
 
@@ -57,23 +57,28 @@
                             }
                             else{
                               $res = $ventas->query($query);
-
-                              while($row = mysqli_fetch_assoc($res)){
-                                $periodo = $row['periodo'];
-                                if((int)$periodo == false){
-                                  $desde        = $row['desde'];
-                                  $hasta        = $row['hasta'];
-                                  if($fecha >= $desde && $fecha <= $hasta){
-                                    echo "<option value='$periodo&$desde&$hasta' selected='selected'>$periodo desde el " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
-                                    $desde_ss   = $desde;
-                                    $hasta_ss   = $hasta;
-                                    $periodo_ss = $periodo;
-                                  }
-                                  else{
-                                    echo "<option value='$periodo&$desde&$hasta'>$periodo desde el " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
-                                    $desde_ss   = $desde;
-                                    $hasta_ss   = $hasta;
-                                    $periodo_ss = $periodo;
+                              if(isset($res)){
+                                $desde_ss   = 0;
+                                $hasta_ss   = 0;
+                                $periodo_ss = 0;
+                              }else{
+                                while($row = mysqli_fetch_assoc($res)){
+                                  $periodo = $row['periodo'];
+                                  if((int)$periodo == false){
+                                    $desde        = $row['desde'];
+                                    $hasta        = $row['hasta'];
+                                    if($fecha >= $desde && $fecha <= $hasta){
+                                      echo "<option value='$periodo&$desde&$hasta' selected='selected'>$periodo desde el " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                                      $desde_ss   = $desde;
+                                      $hasta_ss   = $hasta;
+                                      $periodo_ss = $periodo;
+                                    }
+                                    else{
+                                      echo "<option value='$periodo&$desde&$hasta'>$periodo desde el " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                                      $desde_ss   = $desde;
+                                      $hasta_ss   = $hasta;
+                                      $periodo_ss = $periodo;
+                                    }
                                   }
                                 }
                               }
@@ -107,173 +112,71 @@
 <!-- COMIENZO LLENADO TABLA -->
       <div class="container">
         <table class="table table-condensed">
-          <thead>
-              <tr>
-                  <th style="color: white; background-color: #00ABFF;"><h5><b>División / Departamento</b></h5></th>
-                  <th style="color: white; background-color: #00ABFF;"><h5><b>Ingreso Neto (Sin IVA)</b></h5></th>
-                  <th style="color: white; background-color: #00ABFF;"><h5><b>Meta Venta</b></h5></th>
-                  <th style="color: white; background-color: #00ABFF;"><h5><b>% Cumplimiento</b></h5></th>
-              </tr>
-          </thead>
 
           <?php
-          if(isset($_GET['periodo'])){
-            $get      = $_GET['periodo'];
-            $get_aux  = explode("&", $get);
-            $periodo  = $get_aux[0];
-            $desde    = $get_aux[1];
-            $hasta    = $get_aux[2];
-            $inicio   = $desde;
-            $fin      = $hasta;
+          if(!isset($desde_ss) || !isset($hasta_ss) || !isset($periodo_SS)){
+
+                      echo '<div class="col-lg-4 col-lg-offset-4 col-md-4 col-lg-offset-4 col-sm-4 col-lg-offset-4 col-xs-4 col-lg-offset-4">';
+                      echo '<div class="panel panel-primary">';
+                      echo '<div class="panel-heading"></div>';
+                      echo '<div class="panel-body">';
+                      echo '<h3>No se han encontrado eventos</h3>';
+                      echo '</div>';
+                      echo '</div>';
+                      echo '</div>';
           }
           else{
-            $inicio   = $desde_ss;
-            $fin      = $hasta_ss;
-            $periodo  = $periodo_ss;
-          }
+            echo '<thead>';
+            echo '<tr>';
+            echo '<th style="color: white; background-color: #00ABFF;"><h5><b>División / Departamento</b></h5></th>';
+            echo '<th style="color: white; background-color: #00ABFF;"><h5><b>Ingreso Neto (Sin IVA)</b></h5></th>';
+            echo '<th style="color: white; background-color: #00ABFF;"><h5><b>Meta Venta</b></h5></th>';
+            echo '<th style="color: white; background-color: #00ABFF;"><h5><b>% Cumplimiento</b></h5></th>';
+            echo '</tr>';
+            echo '</thead>';
 
-          // variables para el manejo de OTROS
-          $otros  = 0;
-          $deptos = array();
-          $k      = 0;
+            if(isset($_GET['periodo'])){
+              $get      = $_GET['periodo'];
+              $get_aux  = explode("&", $get);
+              $periodo  = $get_aux[0];
+              $desde    = $get_aux[1];
+              $hasta    = $get_aux[2];
+              $inicio   = $desde;
+              $fin      = $hasta;
+            }
+            else{
+              $inicio   = $desde_ss;
+              $fin      = $hasta_ss;
+              $periodo  = $periodo_ss;
+            }
+              // variables para el manejo de OTROS
+              $otros  = 0;
+              $deptos = array();
+              $k      = 0;
 
-          $query = "select sum(meta) as meta from depto_meta where periodo = '$periodo'";
+              $query = "select sum(meta) as meta from depto_meta where periodo = '$periodo'";
 
-          $res = $ventas->query($query);
+              $res = $ventas->query($query);
 
-          $goal = 0;
+              $goal = 0;
 
-          while($row = mysqli_fetch_assoc($res))
-              $goal = $row['meta'];
+              while($row = mysqli_fetch_assoc($res))
+                  $goal = $row['meta'];
 
-          $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where diaactual between $inicio and $fin";
+              $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where diaactual between $inicio and $fin";
 
-          $res = $ventas->query($query);
+              $res = $ventas->query($query);
 
-          $total_meta = 0;
+              $total_meta = 0;
 
-          while($row = mysqli_fetch_assoc($res))
-              $total_meta = $row['mingresoneto'];
+              while($row = mysqli_fetch_assoc($res))
+                  $total_meta = $row['mingresoneto'];
 
-          $cump = number_format(round(($total_meta / $goal) * 100 , 1), 1, ',', '.');
+              $cump = number_format(round(($total_meta / $goal) * 100 , 1), 1, ',', '.');
 
-          $total_meta = number_format($total_meta, 0, ',', '.');
+              $total_meta = number_format($total_meta, 0, ',', '.');
 
-          $goal = number_format($goal, 0, ',', '.');
-
-          $label = "";
-
-          if($cump < 0)
-              $label = "label label-danger";
-
-          if($cump >= 0 && $cump < 100)
-              $label = "label label-warning";
-
-          if($cump >= 100)
-              $label = "label label-success";
-
-          echo "<tr style='background-color: #C8D7DF;'><td><h5><b>META TOTAL</b></h5></td>";
-          echo "<td><h5 class='text-center'><b>$total_meta</b></h5></td>";
-          echo "<td><h5 class='text-center'><b>$goal</b></h5></td>";
-          echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label''><b>$cump</b></h5></td></tr>";
-
-          $query = "SELECT dm.depto as depto1, d.nomdepto as nomdepto, d.division as division, dm.meta as meta from depto_meta dm, depto d where dm.depto = d.depto1 and dm.periodo = '$periodo' group by division, depto1";
-
-          $res = $ventas->query($query);
-
-          $div_temp = "";
-
-          while($row = mysqli_fetch_assoc($res)){
-              $division = $row['division'];
-              $depto = $row['depto1'];
-              $nomdepto = $row['nomdepto'];
-              $meta = $row['meta'];
-
-              if($div_temp != $division) {
-                  $query = "select sum(dm.meta) as meta from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.periodo = '$periodo'";
-
-                  $result = $ventas->query($query);
-
-                  $meta_div = 0;
-
-                  while ($fila = mysqli_fetch_assoc($result))
-                      $meta_div = $fila['meta'];
-
-                  $query = "select d.depto1 as depto1 from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.periodo = '$periodo'";
-
-                  $result = $ventas->query($query);
-
-                  $cant = mysqli_num_rows($result);
-
-                  $in = "";
-
-                  $i = 0;
-
-                  while ($fila = mysqli_fetch_assoc($result)) {
-                      $in = $in . $fila['depto1'];
-
-                      if ($i < $cant - 1)
-                          $in = $in . ", ";
-
-                      $i++;
-                  }
-
-                  $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where depto1 in ($in) and diaactual between $inicio and $fin";
-
-                  $result = $ventas->query($query);
-
-                  $mingresoneto = 0;
-
-                  while ($fila = mysqli_fetch_assoc($result))
-                      $mingresoneto = $fila['mingresoneto'];
-
-                  $cump = 0;
-                  if($meta_div != 0)
-                      $cump = number_format(round(($mingresoneto / $meta_div) * 100, 1), 1, ',', '.');
-
-                  $mingresoneto = number_format($mingresoneto, 0, ',', '.');
-
-                  $meta_div = number_format($meta_div, 0, ',', '.');
-
-                  $label = "";
-
-                  if($cump < 0)
-                      $label = "label label-danger";
-
-                  if($cump >= 0 && $cump < 100)
-                      $label = "label label-warning";
-
-                  if($cump >= 100)
-                      $label = "label label-success";
-
-                  if($division == 'OTROS'){
-                    $otros = $division."-".$mingresoneto."-".$meta_div."-".$cump;
-                  }else{
-                    echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
-                    echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
-                    echo "<td class='text-center'><h5>$meta_div</h5></td>";
-                    echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
-                  }
-              }
-
-              $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where depto1 = $depto and diaactual between $inicio and $fin";
-
-              $result = $ventas->query($query);
-
-              $mingresoneto = 0;
-
-              while($fila = mysqli_fetch_assoc($result))
-                  $mingresoneto = $fila['mingresoneto'];
-
-              $cump = 0;
-              if($meta != 0)
-                  $cump = round(($mingresoneto / $meta) * 100, 1);
-
-              $mingresoneto = number_format($mingresoneto, 0, ',', '.');
-
-              $cump = number_format($cump, 1, ',', '.');
-
-              $meta = number_format($meta, 0, ',', '.');
+              $goal = number_format($goal, 0, ',', '.');
 
               $label = "";
 
@@ -286,46 +189,160 @@
               if($cump >= 100)
                   $label = "label label-success";
 
-              if($depto == 706 || $depto == 732){
-                $deptos[$k] = $depto."-".$nomdepto."-".$mingresoneto."-".$meta."-".$cump;
-                $k++;
-              }
-              else{
-                echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
-                echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
-                echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
-                echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
-              }
-              $div_temp = $division;
-            }
-// cambio de OTROS para el final de la lista
-            $otros_aux      = explode("-", $otros);
-            $division       = $otros_aux[0];
-            $mingresoneto   = $otros_aux[1];
-            $meta_div       = $otros_aux[2];
-            $cump           = $otros_aux[3];
-            echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
-            echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
-            echo "<td class='text-center'><h5>$meta_div</h5></td>";
-            echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+              echo "<tr style='background-color: #C8D7DF;'><td><h5><b>META TOTAL</b></h5></td>";
+              echo "<td><h5 class='text-center'><b>$total_meta</b></h5></td>";
+              echo "<td><h5 class='text-center'><b>$goal</b></h5></td>";
+              echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label''><b>$cump</b></h5></td></tr>";
 
-            for($i = 0; $i < count($deptos); $i++){
-              $deptos_aux   = $deptos[$i];
-              $deptos_aux   = explode("-", $deptos_aux);
-              $depto        = $deptos_aux[0];
-              $nom_depto    = $deptos_aux[1];
-              $mingresoneto = $deptos_aux[2];
-              $meta         = $deptos_aux[3];
-              $cump         = $deptos_aux[4];
-              echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
-              echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
-              echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
-              echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
-            }
+              $query = "SELECT dm.depto as depto1, d.nomdepto as nomdepto, d.division as division, dm.meta as meta from depto_meta dm, depto d where dm.depto = d.depto1 and dm.periodo = '$periodo' group by division, depto1";
+
+              $res = $ventas->query($query);
+
+              $div_temp = "";
+
+              while($row = mysqli_fetch_assoc($res)){
+                  $division = $row['division'];
+                  $depto = $row['depto1'];
+                  $nomdepto = $row['nomdepto'];
+                  $meta = $row['meta'];
+
+                  if($div_temp != $division) {
+                      $query = "select sum(dm.meta) as meta from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.periodo = '$periodo'";
+
+                      $result = $ventas->query($query);
+
+                      $meta_div = 0;
+
+                      while ($fila = mysqli_fetch_assoc($result))
+                          $meta_div = $fila['meta'];
+
+                      $query = "select d.depto1 as depto1 from depto_meta dm, depto d where d.division = '$division' and dm.depto = d.depto1 and dm.periodo = '$periodo'";
+
+                      $result = $ventas->query($query);
+
+                      $cant = mysqli_num_rows($result);
+
+                      $in = "";
+
+                      $i = 0;
+
+                      while ($fila = mysqli_fetch_assoc($result)) {
+                          $in = $in . $fila['depto1'];
+
+                          if ($i < $cant - 1)
+                              $in = $in . ", ";
+
+                          $i++;
+                      }
+
+                      $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where depto1 in ($in) and diaactual between $inicio and $fin";
+
+                      $result = $ventas->query($query);
+
+                      $mingresoneto = 0;
+
+                      while ($fila = mysqli_fetch_assoc($result))
+                          $mingresoneto = $fila['mingresoneto'];
+
+                      $cump = 0;
+                      if($meta_div != 0)
+                          $cump = number_format(round(($mingresoneto / $meta_div) * 100, 1), 1, ',', '.');
+
+                      $mingresoneto = number_format($mingresoneto, 0, ',', '.');
+
+                      $meta_div = number_format($meta_div, 0, ',', '.');
+
+                      $label = "";
+
+                      if($cump < 0)
+                          $label = "label label-danger";
+
+                      if($cump >= 0 && $cump < 100)
+                          $label = "label label-warning";
+
+                      if($cump >= 100)
+                          $label = "label label-success";
+
+                      if($division == 'OTROS'){
+                        $otros = $division."-".$mingresoneto."-".$meta_div."-".$cump;
+                      }else{
+                        echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                        echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
+                        echo "<td class='text-center'><h5>$meta_div</h5></td>";
+                        echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                      }
+                  }
+
+                  $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where depto1 = $depto and diaactual between $inicio and $fin";
+
+                  $result = $ventas->query($query);
+
+                  $mingresoneto = 0;
+
+                  while($fila = mysqli_fetch_assoc($result))
+                      $mingresoneto = $fila['mingresoneto'];
+
+                  $cump = 0;
+                  if($meta != 0)
+                      $cump = round(($mingresoneto / $meta) * 100, 1);
+
+                  $mingresoneto = number_format($mingresoneto, 0, ',', '.');
+
+                  $cump = number_format($cump, 1, ',', '.');
+
+                  $meta = number_format($meta, 0, ',', '.');
+
+                  $label = "";
+
+                  if($cump < 0)
+                      $label = "label label-danger";
+
+                  if($cump >= 0 && $cump < 100)
+                      $label = "label label-warning";
+
+                  if($cump >= 100)
+                      $label = "label label-success";
+
+                  if($depto == 706 || $depto == 732){
+                    $deptos[$k] = $depto."-".$nomdepto."-".$mingresoneto."-".$meta."-".$cump;
+                    $k++;
+                  }
+                  else{
+                    echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
+                    echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
+                    echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
+                    echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                  }
+                  $div_temp = $division;
+                }
+    // cambio de OTROS para el final de la lista
+                $otros_aux      = explode("-", $otros);
+                $division       = $otros_aux[0];
+                $mingresoneto   = $otros_aux[1];
+                $meta_div       = $otros_aux[2];
+                $cump           = $otros_aux[3];
+                echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
+                echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
+                echo "<td class='text-center'><h5>$meta_div</h5></td>";
+                echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+
+                for($i = 0; $i < count($deptos); $i++){
+                  $deptos_aux   = $deptos[$i];
+                  $deptos_aux   = explode("-", $deptos_aux);
+                  $depto        = $deptos_aux[0];
+                  $nom_depto    = $deptos_aux[1];
+                  $mingresoneto = $deptos_aux[2];
+                  $meta         = $deptos_aux[3];
+                  $cump         = $deptos_aux[4];
+                  echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
+                  echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
+                  echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
+                  echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
+                }
+              }
           ?>
         </table>
       </div>
-
 
 <!-- INICIO FOOTER -->
     <script src="jquery-1.12.0.min.js"></script>
