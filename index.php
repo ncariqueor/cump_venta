@@ -3,6 +3,16 @@
     <head>
         <title>Panel de Seguimiento Metas</title>
         <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+            ga('create', 'UA-88784345-1', 'auto');
+            ga('send', 'pageview');
+
+        </script>
+        <script>
         function showUser(str) {
             if (str == "") {
                 document.getElementById("periodo").innerHTML = "";
@@ -341,25 +351,13 @@
                 if($cump >= 100)
                     $label = "label label-success";
 
-
-                //$otros = array();
-                //$i = 0;
                 if($division == 'OTROS'){
                   $otros = $division."-".$mingresoneto."-".$meta_div."-".$cump;
-                  //$k++;
-                  //echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
-                  //echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
-                  //echo "<td class='text-center'><h5>$meta_div</h5></td>";
-                  //echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
                 }else{
                   echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
                   echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
                   echo "<td class='text-center'><h5>$meta_div</h5></td>";
                   echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
-                  //echo "<td class='text-center'><h5></h5></td>";
-                  //echo "<td class='text-center'><h5></h5></td>";
-                  //echo "<td class='text-center'><h5></h5></td>";
-                  //echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'></h5></td></tr>";
                 }
             }
 
@@ -412,6 +410,14 @@
         $mingresoneto   = $otros_aux[1];
         $meta_div       = $otros_aux[2];
         $cump           = $otros_aux[3];
+        if($cump < 0)
+            $label = "label label-danger";
+
+        if($cump >= 0 && $cump < 100)
+            $label = "label label-warning";
+
+        if($cump >= 100)
+            $label = "label label-success";
         echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
         echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
         echo "<td class='text-center'><h5>$meta_div</h5></td>";
@@ -425,6 +431,15 @@
           $mingresoneto = $deptos_aux[2];
           $meta         = $deptos_aux[3];
           $cump         = $deptos_aux[4];
+
+            if($cump < 0)
+                $label = "label label-danger";
+
+            if($cump >= 0 && $cump < 100)
+                $label = "label label-warning";
+
+            if($cump >= 100)
+                $label = "label label-success";
           echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
           echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
           echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
