@@ -112,7 +112,7 @@
 <!-- COMIENZO LLENADO TABLA -->
 
       <div class="container">
-        <table class="table table-condensed">
+        <table class="table table-condensed table-hover">
 
           <?php
           if (isset($var)) {
