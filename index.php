@@ -202,7 +202,7 @@
 
 <!-- Fila principal -->
   <div class="container">
-  <table class="table table-condensed">
+  <table class="table table-condensed table-hover">
       <thead>
           <tr>
               <th style="color: white; background-color: #00ABFF;"><h5><b>División / Departamento</b></h5></th>
@@ -229,6 +229,7 @@
           $fin = $hasta_ss;
           $periodo = $periodo_ss;
         }
+        // variables para el manejo de OTROS
         $otros  = 0;
         $deptos = array();
         $k      = 0;
@@ -240,7 +241,6 @@
         while($row = mysqli_fetch_assoc($res))
             $goal = $row['meta'];
 
-        //echo "inicio " . $inicio . " fin " . $fin;
         $query = "select sum(mingresoneto) as mingresoneto from resdepto1 where diaactual between $inicio and $fin";
 
         $res = $ventas->query($query);
@@ -341,25 +341,13 @@
                 if($cump >= 100)
                     $label = "label label-success";
 
-
-                //$otros = array();
-                //$i = 0;
                 if($division == 'OTROS'){
                   $otros = $division."-".$mingresoneto."-".$meta_div."-".$cump;
-                  //$k++;
-                  //echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
-                  //echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
-                  //echo "<td class='text-center'><h5>$meta_div</h5></td>";
-                  //echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
                 }else{
                   echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
                   echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
                   echo "<td class='text-center'><h5>$meta_div</h5></td>";
                   echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
-                  //echo "<td class='text-center'><h5></h5></td>";
-                  //echo "<td class='text-center'><h5></h5></td>";
-                  //echo "<td class='text-center'><h5></h5></td>";
-                  //echo "<td class='text-center' style='font-size: 15px;'><h5 class='$label'></h5></td></tr>";
                 }
             }
 
@@ -412,6 +400,16 @@
         $mingresoneto   = $otros_aux[1];
         $meta_div       = $otros_aux[2];
         $cump           = $otros_aux[3];
+
+        if($cump < 0)
+            $label = "label label-danger";
+
+        if($cump >= 0 && $cump < 100)
+            $label = "label label-warning";
+
+        if($cump >= 100)
+            $label = "label label-success";
+
         echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
         echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
         echo "<td class='text-center'><h5>$meta_div</h5></td>";
@@ -425,7 +423,17 @@
           $mingresoneto = $deptos_aux[2];
           $meta         = $deptos_aux[3];
           $cump         = $deptos_aux[4];
-          echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
+
+          if($cump < 0)
+              $label = "label label-danger";
+
+          if($cump >= 0 && $cump < 100)
+              $label = "label label-warning";
+
+          if($cump >= 100)
+              $label = "label label-success";
+
+          echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nom_depto</h5></td>";
           echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
           echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
           echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";

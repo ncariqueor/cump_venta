@@ -57,7 +57,7 @@
                             }
                             else{
                               $res = $ventas->query($query);
-                              if(isset($res)){
+                              if(!isset($res)){
                                 $desde_ss   = 0;
                                 $hasta_ss   = 0;
                                 $periodo_ss = 0;
@@ -110,11 +110,15 @@
         </div><br>
 
 <!-- COMIENZO LLENADO TABLA -->
+
       <div class="container">
         <table class="table table-condensed">
 
           <?php
-          if(!isset($desde_ss) || !isset($hasta_ss) || !isset($periodo_SS)){
+          if (isset($var)) {
+            echo "Esta variable está definida, así que se imprimirá";
+          }
+          if($desde_ss === NULL || $hasta_ss === 0 || (int)$periodo_ss == true){
 
                       echo '<div class="col-lg-4 col-lg-offset-4 col-md-4 col-lg-offset-4 col-sm-4 col-lg-offset-4 col-xs-4 col-lg-offset-4">';
                       echo '<div class="panel panel-primary">';
@@ -321,6 +325,16 @@
                 $mingresoneto   = $otros_aux[1];
                 $meta_div       = $otros_aux[2];
                 $cump           = $otros_aux[3];
+
+                if($cump < 0)
+                    $label = "label label-danger";
+
+                if($cump >= 0 && $cump < 100)
+                    $label = "label label-warning";
+
+                if($cump >= 100)
+                    $label = "label label-success";
+
                 echo '<tr><td><h5><a href="#" style="text-decoration: none;" onclick="mostrar'; echo "('.$division'); return false;"; echo '"><b>' . $division . '</b> <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span></h5></a></td>';
                 echo "<td class='text-center'><h5>$mingresoneto</h5></td>";
                 echo "<td class='text-center'><h5>$meta_div</h5></td>";
@@ -334,7 +348,17 @@
                   $mingresoneto = $deptos_aux[2];
                   $meta         = $deptos_aux[3];
                   $cump         = $deptos_aux[4];
-                  echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nomdepto</h5></td>";
+
+                  if($cump < 0)
+                      $label = "label label-danger";
+
+                  if($cump >= 0 && $cump < 100)
+                      $label = "label label-warning";
+
+                  if($cump >= 100)
+                      $label = "label label-success";
+
+                  echo "<tr><td class='$division' style='display:none;'><h5>$depto - $nom_depto</h5></td>";
                   echo "<td class='$division' style='display:none;'><h5 class='text-center'>$mingresoneto</h5></td>";
                   echo "<td class='$division' style='display:none;'><h5 class='text-center'>$meta</h5></td>";
                   echo "<td class='$division text-center' style='display:none; font-size: 15px;'><h5 class='$label'>$cump</h5></td></tr>";
