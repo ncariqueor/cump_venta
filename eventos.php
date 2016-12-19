@@ -48,6 +48,7 @@
 
                               while($row = mysqli_fetch_assoc($res)){
                                 $periodo = $row['periodo'];
+                                $count = 1;
                                 if((int)$periodo == false){
                                   $desde = $row['desde'];
                                   $hasta = $row['hasta'];
@@ -57,14 +58,28 @@
                             }
                             else{
                               $res = $ventas->query($query);
-                              if(!isset($res)){
+                              //echo $res;
+                              /*if(!isset($res)){
+                                $aux = 0;
                                 $desde_ss   = 0;
                                 $hasta_ss   = 0;
                                 $periodo_ss = 0;
-                              }else{
+                                echo '<div class="col-lg-4 col-lg-offset-4 col-md-4 col-lg-offset-4 col-sm-4 col-lg-offset-4 col-xs-4 col-lg-offset-4">';
+                                echo '<div class="panel panel-primary">';
+                                echo '<div class="panel-heading"></div>';
+                                echo '<div class="panel-body">';
+                                echo '<h3>No se han encontrado eventos</h3>';
+                                echo '</div>';
+                                echo '</div>';
+                                echo '</div>';
+                              }else{*/
                                 while($row = mysqli_fetch_assoc($res)){
+
                                   $periodo = $row['periodo'];
+                                  $count   = 0;
+
                                   if((int)$periodo == false){
+                                    $count++;
                                     $desde        = $row['desde'];
                                     $hasta        = $row['hasta'];
                                     if($fecha >= $desde && $fecha <= $hasta){
@@ -81,7 +96,7 @@
                                     }
                                   }
                                 }
-                              }
+                              //}
                             }
                           ?>
                         </select>
@@ -115,19 +130,15 @@
         <table class="table table-condensed table-hover">
 
           <?php
-          if (isset($var)) {
-            echo "Esta variable está definida, así que se imprimirá";
-          }
-          if($desde_ss === NULL || $hasta_ss === 0 || (int)$periodo_ss == true){
-
-                      echo '<div class="col-lg-4 col-lg-offset-4 col-md-4 col-lg-offset-4 col-sm-4 col-lg-offset-4 col-xs-4 col-lg-offset-4">';
-                      echo '<div class="panel panel-primary">';
-                      echo '<div class="panel-heading"></div>';
-                      echo '<div class="panel-body">';
-                      echo '<h3>No se han encontrado eventos</h3>';
-                      echo '</div>';
-                      echo '</div>';
-                      echo '</div>';
+          if($count == 0){
+            echo '<div class="col-lg-4 col-lg-offset-4 col-md-4 col-lg-offset-4 col-sm-4 col-lg-offset-4 col-xs-4 col-lg-offset-4">';
+            echo '<div class="panel panel-primary">';
+            echo '<div class="panel-heading"></div>';
+            echo '<div class="panel-body">';
+            echo '<h3>No se han encontrado eventos</h3>';
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
           }
           else{
             echo '<thead>';
