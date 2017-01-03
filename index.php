@@ -149,24 +149,31 @@
                       }
                       else{
                         $res = $ventas->query($query);
-
+                        $array = array();
+                        $i=0;
                         while($row = mysqli_fetch_assoc($res)){
                           $periodo      = $row['periodo'];
                           $periodo_aux  = substr($periodo, -2);
                           $desde        = $row['desde'];
                           $hasta        = $row['hasta'];
+                          $periodo_año  = substr($periodo,0 , -2);
+                          $array[$i]    = $periodo_año;
+                          $array[0]     = 0;
 
                           if($fecha >= $desde && $fecha <= $hasta){
                             echo "<option value='$periodo&$desde&$hasta' selected='selected'>Periodo comercial $periodo_aux:  " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
                             $desde_ss     = $desde;
                             $hasta_ss     = $hasta;
                             $periodo_ss   = $periodo;
-                            $periodo_año  = substr($periodo,0 , -2);
+                            $i++;
+
                           }
-                          elseif($periodo <= $periodo_año."12" && $periodo > ($periodo_año-1)."12"){
+
+                          elseif($array[($i-1)] == $array[$i] || $array[$i] == 0){
                             echo "<option value='$periodo&$desde&$hasta'>Periodo comercial $periodo_aux:  " . date("d/m/Y", strtotime("{$desde}")) . " al " . date("d/m/Y", strtotime("{$hasta}")) . "</option>";
+                            $i++;
                           }
-                          $año = substr($periodo, 0, -2);
+                          //$año = substr($periodo, 0, -2);
                       }
                     }
                     ?>
